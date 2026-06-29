@@ -2,95 +2,91 @@ import Author from "../models/Author";
 import Category from "../models/Category";
 import Book from "../models/Book";
 
-const formatAuthor = (author: any) => ({
-  id: author?._id?.toString() ?? author?.id ?? "",
-  name: author?.name ?? "",
-  biography: author?.biography ?? "",
-  country: author?.country ?? "",
-});
-
-const formatCategory = (category: any) => ({
-  id: category?._id?.toString() ?? category?.id ?? "",
-  name: category?.name ?? "",
-});
-
-const formatBook = (book: any, author: any, category: any) => ({
-  id: book?._id?.toString() ?? book?.id ?? "",
-  title: book?.title ?? "",
-  description: book?.description ?? "",
-  publishedYear: book?.publishedYear ?? 0,
-  pages: book?.pages ?? 0,
-  author: formatAuthor(author),
-  category: formatCategory(category),
-});
-
 export const resolvers = {
   Query: {
+    // ================= AUTHORS =================
     authors: async () => {
-      const authors = await Author.find().lean();
-      return authors.map(formatAuthor);
+      return await Author.find();
     },
 
     author: async (_: any, { id }: { id: string }) => {
-      const author = await Author.findById(id).lean();
-      return author ? formatAuthor(author) : null;
+      return await Author.findById(id);
     },
 
+    // ================= CATEGORIES =================
     categories: async () => {
-      const categories = await Category.find().lean();
-      return categories.map(formatCategory);
+      return await Category.find();
     },
 
     category: async (_: any, { id }: { id: string }) => {
-      const category = await Category.findById(id).lean();
-      return category ? formatCategory(category) : null;
+      return await Category.findById(id);
     },
 
+    // ================= BOOKS =================
     books: async () => {
-      const books = await Book.find().lean();
-      return await Promise.all(
-        books.map(async (book: any) => {
-          const author = book.author ? await Author.findById(book.author).lean() : null;
-          const category = book.category ? await Category.findById(book.category).lean() : null;
-          return formatBook(book, author, category);
-        })
-      );
+      return await Book.find();
     },
 
     book: async (_: any, { id }: { id: string }) => {
-      const book = await Book.findById(id).lean();
-      if (!book) return null;
+      return await Book.findById(id);
+    },
+  },
 
-      const author = book.author ? await Author.findById(book.author).lean() : null;
-      const category = book.category ? await Category.findById(book.category).lean() : null;
-      return formatBook(book, author, category);
+  // ================= FIELD RESOLVERS =================
+  Book: {
+    author: async (parent: any) => {
+      return await Author.findById(parent.author);
+    },
+
+    category: async (parent: any) => {
+      return await Category.findById(parent.category);
     },
   },
 
   Mutation: {
+    // ================= AUTHORS =================
     createAuthor: async (_: any, { input }: any) => {
-      const author = await Author.create(input);
-      const authorData = author.toObject() as { biography?: string; country?: string };
+      return await Author.create(input);
+    },
 
-      return formatAuthor({
-        ...input,
-        ...authorData,
-        biography: input?.biography ?? authorData?.biography ?? "",
-        country: input?.country ?? authorData?.country ?? "",
+    updateAuthor: async (_: any, { id, input }: any) => {
+      return await Author.findByIdAndUpdate(id, input, {
+        new: true,
       });
     },
 
-    createCategory: async (_: any, { input }: any) => {
-      const category = await Category.create(input);
-      return formatCategory(category.toObject());
+    deleteAuthor: async (_: any, { id }: any) => {
+      return await Author.findByIdAndDelete(id);
     },
 
+    // ================= CATEGORIES =================
+    createCategory: async (_: any, { input }: any) => {
+      return await Category.create(input);
+    },
+
+    updateCategory: async (_: any, { id, input }: any) => {
+      return await Category.findByIdAndUpdate(id, input, {
+        new: true,
+      });
+    },
+
+    deleteCategory: async (_: any, { id }: any) => {
+      return await Category.findByIdAndDelete(id);
+    },
+
+    // ================= BOOKS =================
     createBook: async (_: any, { input }: any) => {
-      const createdBook = await Book.create(input);
-      const book = await Book.findById(createdBook._id).lean();
-      const author = book?.author ? await Author.findById(book.author).lean() : null;
-      const category = book?.category ? await Category.findById(book.category).lean() : null;
-      return book ? formatBook(book, author, category) : null;
+      return await Book.create(input);
+    },
+
+    updateBook: async (_: any, { id, input }: any) => {
+      return await Book.findByIdAndUpdate(id, input, {
+        new: true,
+      });
+    },
+
+    deleteBook: async (_: any, { id }: any) => {
+      return await Book.findByIdAndDelete(id);
     },
   },
 };

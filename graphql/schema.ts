@@ -22,6 +22,8 @@ type Book {
   category: Category!
 }
 
+# ================= CREATE INPUTS =================
+
 input CreateAuthorInput {
   name: String!
   biography: String!
@@ -41,6 +43,29 @@ input CreateBookInput {
   category: ID!
 }
 
+# ================= UPDATE INPUTS =================
+
+input UpdateAuthorInput {
+  name: String
+  biography: String
+  country: String
+}
+
+input UpdateCategoryInput {
+  name: String
+}
+
+input UpdateBookInput {
+  title: String
+  description: String
+  publishedYear: Int
+  pages: Int
+  author: ID
+  category: ID
+}
+
+# ================= QUERIES =================
+
 type Query {
   authors: [Author!]!
   author(id: ID!): Author
@@ -52,10 +77,25 @@ type Query {
   book(id: ID!): Book
 }
 
+# ================= MUTATIONS =================
+
 type Mutation {
+
+  # ---------- Authors ----------
   createAuthor(input: CreateAuthorInput!): Author!
+  updateAuthor(id: ID!, input: UpdateAuthorInput!): Author
+  deleteAuthor(id: ID!): Author
+
+  # ---------- Categories ----------
   createCategory(input: CreateCategoryInput!): Category!
+  updateCategory(id: ID!, input: UpdateCategoryInput!): Category
+  deleteCategory(id: ID!): Category
+
+  # ---------- Books ----------
   createBook(input: CreateBookInput!): Book!
+  updateBook(id: ID!, input: UpdateBookInput!): Book
+  deleteBook(id: ID!): Book
 }
 `;
+
 console.log("Schema loaded");
