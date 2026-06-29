@@ -22,6 +22,22 @@ type Book {
   category: Category!
 }
 
+type User {
+  id: ID!
+  username: String!
+  role: String!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type UploadResponse {
+  filename: String!
+  path: String!
+}
+
 # ================= CREATE INPUTS =================
 
 input CreateAuthorInput {
@@ -41,6 +57,16 @@ input CreateBookInput {
   pages: Int!
   author: ID!
   category: ID!
+}
+
+input RegisterInput {
+  username: String!
+  password: String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
 }
 
 # ================= UPDATE INPUTS =================
@@ -75,11 +101,15 @@ type Query {
 
   books: [Book!]!
   book(id: ID!): Book
+
+  me: User
 }
 
 # ================= MUTATIONS =================
 
 type Mutation {
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
 
   # ---------- Authors ----------
   createAuthor(input: CreateAuthorInput!): Author!
@@ -95,6 +125,8 @@ type Mutation {
   createBook(input: CreateBookInput!): Book!
   updateBook(id: ID!, input: UpdateBookInput!): Book
   deleteBook(id: ID!): Book
+
+  uploadFile(fileName: String!, base64Content: String!): UploadResponse!
 }
 `;
 
